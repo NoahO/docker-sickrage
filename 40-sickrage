@@ -1,0 +1,72 @@
+#!/usr/bin/with-contenv bash
+
+# permissions (recursive)
+chown -R abc:abc \
+	/config \
+	/nzbtomedia
+
+#Set auto update
+sed -i "/\[General\]/,/^$/ s/auto_update = .*/auto_update = 1/" /config/config.ini
+
+#Enable failed_download_handling
+sed -i "/\[FailedDownloads\]/,/^$/ s/use_failed_downloads = .*/use_failed_downloads = 1/" /config/config.ini
+sed -i "/\[FailedDownloads\]/,/^$/ s/delete_failed = .*/delete_failed = 1/" /config/config.ini
+sed -i "/\[General\]/,/^$/ s/create_missing_show_dirs = .*/create_missing_show_dirs = 1/" /config/config.ini
+sed -i "/\[General\]/,/^$/ s/move_associated_files = .*/move_associated_files = 1/" /config/config.ini
+
+#Set SABnzbd apikey in sickrage
+sabAPI=$(cat /sabnzbdconfig/sabnzbd.ini | grep -m1 "api_key = ................................" | cut -d, -f2 | grep "api_key = ................................" | cut -d= -f2)
+sed -i "/\[SABnzbd\]/,/^$/ s/sab_apikey = .*/sab_apikey = $sabAPI/" /config/config.ini
+
+#Set reverse proxy
+sed -i '/\[SABnzbd\]/,/^$/ s/web_root = .*/web_root = \/sickrage/' /config/config.ini
+sed -i '/\[SABnzbd\]/,/^$/ s/handle_reverse_proxy = .*/handle_reverse_proxy = 1/' /config/config.ini
+
+#Set SABnzbd Host
+sed -i '/\[SABnzbd\]/,/^$/ s/sab_host = .*/sab_host = http:\/\/172.18.0.1:8082\//' /config/config.ini
+
+#Set SABnzbd category
+sed -i '/\[SABnzbd\]/,/^$/ s/sab_category = .*/sab_category = tv/' /config/config.ini
+sed -i '/\[SABnzbd\]/,/^$/ s/sab_category_backlog = .*/sab_category_backlog = tv/' /config/config.ini
+
+#Set Transmission Host
+sed -i '/\[TORRENT\]/,/^$/ s/torrent_host = .*/torrent_host = http:\/\/172.18.0.1:9091\//' /config/config.ini
+
+#Set Torrent Location
+sed -i '/\[TORRENT\]/,/^$/ s/torrent_path = .*/torrent_path = \/downloads\/Downloads\/tv/' /config/config.ini
+
+## Add your Sickrage API key to nzbmedia on sabnzbd, transmission
+#srAPI=$(cat /config/config.ini | grep -w "api_key =" | cut -f3 -d " ")
+### Write the API key to autoProcessMedia for sickbeard
+#php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?apikey =\K.*?$/sm" " $sbAPI" /app/autoProcessMedia.cfg
+# Api key not supported currently on sickrage fork.
+#When I secure this I can change it to user/pass
+
+#Set Transmission user / pass (when secured)
+
+#Set up nzbtomedia
+cd /nzbtomedia
+if ! git rev-parse --is-inside-work-tree; then
+	cp -r /root/nzbtomedia /
+	cp /nzbtomedia/autoProcessMedia.cfg.spec /nzbtomedia/autoProcessMedia.cfg
+	echo copied file
+	chown -R abc:abc /nzbtomedia
+fi
+
+# Set host to docker bridge network
+sed -i 's/host = .*/host = 172.18.0.1/' /nzbtomedia/autoProcessMedia.cfg
+
+# Turn on nzbToMedia auto_update, set up ffmpeg
+sed -i '/\[General\]/,/^$/ s/auto_update = .*/auto_update = 1/' /nzbtomedia/autoProcessMedia.cfg
+#sed -i '/\[General\]/,/^$/ s/ffmpeg_path = .*/ffmpeg_path = \/usr\/bin\//' /nzbtomedia/autoProcessMedia.cfg
+
+# Enable Sickbeard support
+php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?enabled =\K.*?$/sm" " 1" /nzbtomedia/autoProcessMedia.cfg
+php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?web_root =\K.*?$/sm" " /sickrage" /nzbtomedia/autoProcessMedia.cfg
+
+# Delete failed, ignored, set link mode
+php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?delete_failed =\K.*?$/sm" " 1" /nzbtomedia/autoProcessMedia.cfg
+php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?delete_ignored =\K.*?$/sm" " 1" /nzbtomedia/autoProcessMedia.cfg
+php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?delete_on =\K.*?$/sm" " 0" /nzbtomedia/autoProcessMedia.cfg
+php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?Torrent_NoLink =\K.*?$/sm" " 1" /nzbtomedia/autoProcessMedia.cfg
+php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?process_method =\K.*?$/sm" " move" /nzbtomedia/autoProcessMedia.cfg
