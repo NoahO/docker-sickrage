@@ -1,6 +1,6 @@
-FROM linuxserver/sickrage
+FROM linuxserver/sickchill
 
-COPY 40-sickrage /etc/cont-init.d
+COPY 40-sickchill /etc/cont-init.d
 COPY phpsed.php /
 
 RUN apk add --no-cache \
@@ -13,4 +13,4 @@ RUN chown -R abc:abc /root/nzbtomedia
 
 VOLUME /nzbtomedia
 
-HEALTHCHECK --retries=8 CMD curl -f http://localhost:8081/sickrage || exit 1
+HEALTHCHECK --retries=8 CMD curl -f http://localhost:8081/sickchill || exit 1
