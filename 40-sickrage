@@ -2,8 +2,18 @@
 
 # permissions (recursive)
 chown -R abc:abc \
-	/config \
 	/nzbtomedia
+
+# If config doesn't exist yet, start sabnzbd for 10 seconds to build config, then stop.
+if ! [ -f /config/config.ini ]; then
+	#Start to create config
+	/etc/services.d/sickrage/run &
+	#Finish first run
+	sleep 10
+	#Shutdown SAB
+	killall python
+	sleep 5
+fi
 
 #Set auto update
 sed -i "/\[General\]/,/^$/ s/auto_update = .*/auto_update = 1/" /config/config.ini

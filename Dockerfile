@@ -13,4 +13,4 @@ RUN chown -R abc:abc /root/nzbtomedia
 
 VOLUME /nzbtomedia
 
-HEALTHCHECK --retries=8 CMD curl -f http://localhost:8081 || exit 1
+HEALTHCHECK --retries=8 CMD curl -f http://localhost:8081/sickrage || exit 1
