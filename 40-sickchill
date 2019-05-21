@@ -9,7 +9,7 @@ if ! [ -f /config/config.ini ]; then
 	#Start to create config
 	/etc/services.d/sickchill/run &
 	#Finish first run
-	sleep 10
+	sleep 60
 	#Shutdown SAB
 	killall python
 	sleep 5
