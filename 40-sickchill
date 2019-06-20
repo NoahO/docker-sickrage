@@ -7,10 +7,12 @@ chown -R abc:abc \
 # If config doesn't exist yet, start sabnzbd for 10 seconds to build config, then stop.
 if ! [ -f /config/config.ini ]; then
 	#Start to create config
+	echo "Starting Sickchill to build config, waiting 60 seconds."
 	/etc/services.d/sickchill/run &
 	#Finish first run
 	sleep 60
 	#Shutdown SAB
+	echo "Killing Sickchill, waiting 5 seconds."
 	killall python
 	sleep 5
 fi
@@ -33,7 +35,7 @@ sed -i '/\[SABnzbd\]/,/^$/ s/web_root = .*/web_root = \/sickchill/' /config/conf
 sed -i '/\[SABnzbd\]/,/^$/ s/handle_reverse_proxy = .*/handle_reverse_proxy = 1/' /config/config.ini
 
 #Set SABnzbd Host
-sed -i '/\[SABnzbd\]/,/^$/ s/sab_host = .*/sab_host = http:\/\/sabnzbd:8082\//' /config/config.ini
+sed -i '/\[SABnzbd\]/,/^$/ s/sab_host = .*/sab_host = http:\/\/sabnzbd:8080\//' /config/config.ini
 
 #Set SABnzbd category
 sed -i '/\[SABnzbd\]/,/^$/ s/sab_category = .*/sab_category = tv/' /config/config.ini
