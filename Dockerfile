@@ -13,4 +13,4 @@ RUN chown -R abc:abc /root/nzbtomedia
 
 VOLUME /nzbtomedia
 
-HEALTHCHECK --retries=8 CMD curl -f http://localhost:8081/sickchill || exit 1
+HEALTHCHECK --start-period=600s CMD curl -f http://localhost:8081/sickchill || exit 1
