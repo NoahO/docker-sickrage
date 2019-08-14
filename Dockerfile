@@ -2,6 +2,7 @@ FROM linuxserver/sickchill
 
 COPY 40-sickchill /etc/cont-init.d
 COPY phpsed.php /
+COPY phpmatchecho.php /
 
 RUN apk add --no-cache \
 	--repository http://nl.alpinelinux.org/alpine/edge/main \

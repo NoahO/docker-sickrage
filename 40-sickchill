@@ -18,7 +18,7 @@ if ! [ -f /config/config.ini ]; then
 fi
 
 #Set auto update
-sed -i "/\[General\]/,/^$/ s/auto_update = .*/auto_update = 1/" /config/config.ini
+sed -i "/\[General\]/,/^$/ s/auto_update = .*/auto_update = 0/" /config/config.ini
 
 #Enable failed_download_handling
 sed -i "/\[FailedDownloads\]/,/^$/ s/use_failed_downloads = .*/use_failed_downloads = 1/" /config/config.ini
@@ -61,7 +61,6 @@ cd /nzbtomedia
 if ! git rev-parse --is-inside-work-tree; then
 	cp -r /root/nzbtomedia /
 	cp /nzbtomedia/autoProcessMedia.cfg.spec /nzbtomedia/autoProcessMedia.cfg
-	echo copied file
 	chown -R abc:abc /nzbtomedia
 fi
 
@@ -82,3 +81,25 @@ php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?delete_ignored =\K.*?$/sm" " 1" /
 php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?delete_on =\K.*?$/sm" " 0" /nzbtomedia/autoProcessMedia.cfg
 php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?Torrent_NoLink =\K.*?$/sm" " 1" /nzbtomedia/autoProcessMedia.cfg
 php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?process_method =\K.*?$/sm" " move" /nzbtomedia/autoProcessMedia.cfg
+
+while [ ! -f /hydra2config/nzbhydra.yml ]; do
+	sleep 1
+	echo "Waiting for hydra2 config to be ready"
+done
+
+#Set Hydra2API
+hydra2Api=$(php /phpmatchecho.php '/(?<=main:).*apiKey:\s"\K..........................(?=")/s' /hydra2config/nzbhydra.yml)
+php /phpsed.php '/newznab_data = "\K(?!.*Hydra2)(?=.*")/' "Hydra2|http://hydra2:5076/nzbhydra/|$hydra2Api||1|eponly|0|1|1!!!" /config/config.ini
+php /phpsed.php '/provider_order = \K(?!.*hydra2)/' "hydra2 " /config/config.ini
+
+if ! grep -q "\[HYDRA2\]" /config/config.ini; then
+	cat <<EOT >>/config/config.ini
+[HYDRA2]
+hydra2 = 1
+hydra2_search_mode = eponly
+hydra2_search_fallback = 0
+hydra2_enable_daily = 1
+hydra2_enable_backlog = 1
+hydra2_cookies = ""
+EOT
+fi
