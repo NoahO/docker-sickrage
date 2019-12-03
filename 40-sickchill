@@ -89,15 +89,16 @@ done
 
 #Set Hydra2API
 hydra2Api=$(php /phpmatchecho.php '/(?<=main:).*apiKey:\s"\K..........................(?=")/s' /hydra2config/nzbhydra.yml)
-php /phpsed.php '/newznab_data = "\K(?!.*Hydra2)(?=.*")/' "Hydra2|http://hydra2:5076/nzbhydra/|$hydra2Api||1|eponly|0|1|1!!!" /config/config.ini
-php /phpsed.php '/provider_order = \K(?!.*hydra2)/' "hydra2 " /config/config.ini
+php /phpsed.php '/newznab_data = "\K(?!.*Hydra2)(?=.*")/' "Hydra2|http://hydra2:5076/nzbhydra/|$hydra2Api|5000,5070,5040,5030|1|eponly|1|1|1" /config/config.ini
+
+php /phpsed.php '/provider_order = \K(?!.*Hydra2)/' "Hydra2 " /config/config.ini
 
 if ! grep -q "\[HYDRA2\]" /config/config.ini; then
 	cat <<EOT >>/config/config.ini
 [HYDRA2]
 hydra2 = 1
 hydra2_search_mode = eponly
-hydra2_search_fallback = 0
+hydra2_search_fallback = 1
 hydra2_enable_daily = 1
 hydra2_enable_backlog = 1
 hydra2_cookies = ""
