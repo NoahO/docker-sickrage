@@ -65,7 +65,7 @@ if ! git rev-parse --is-inside-work-tree; then
 fi
 
 # Set Sickrage host
-php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?host =\K.*?$/sm" "sickchill" /nzbtomedia/autoProcessMedia.cfg
+php /phpsed.php "/\[SickBeard\].*?\[\[tv\]\].*?host =\K.*?$/sm" " sickchill" /nzbtomedia/autoProcessMedia.cfg
 
 # Turn on nzbToMedia auto_update, set up ffmpeg
 sed -i '/\[General\]/,/^$/ s/auto_update = .*/auto_update = 1/' /nzbtomedia/autoProcessMedia.cfg
